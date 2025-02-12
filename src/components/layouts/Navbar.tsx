@@ -19,7 +19,7 @@ export function Navbar() {
           <div className="flex">
             <Link to="/dashboard" className="flex items-center">
               <Heart className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">Cloud Based PHR Management System by Siddhartha Academy of Higher Edu.</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">Cloud Based PHR Management</span>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
