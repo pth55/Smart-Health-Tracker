@@ -143,7 +143,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <Heart className="h-8 w-8 text-blue-600" />
-            <span className="ml-2 text-xl font-bold text-gray-900">HealthTrack</span>
+            <span className="ml-2 text-xl font-bold text-gray-900">Cloud Based PHR Management System by Siddhartha Academy of Higher Edu.</span>
           </div>
           <div className="flex items-center space-x-4">
             <button onClick={() => { setIsSignUp(false); setShowAuthModal(true); setError(''); }} className="px-4 py-2 text-blue-600 hover:text-blue-700">Log In</button>
