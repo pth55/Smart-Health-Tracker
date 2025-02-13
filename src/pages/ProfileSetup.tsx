@@ -14,9 +14,12 @@ export function ProfileSetup() {
     height: undefined,
     aadhar_number: '',
     blood_type: '',
-    phone_number: '', // Added phone_number field
+    phone_number: '',
   });
+  const [email, setEmail] = useState<string>('');
+  const [isEditing, setIsEditing] = useState(false);
 
+  // Load profile data when the component is mounted
   useEffect(() => {
     const loadProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -24,6 +27,9 @@ export function ProfileSetup() {
         navigate('/');
         return;
       }
+
+      // Set the email from the authentication user
+      setEmail(user.email || '');
 
       // Load existing profile data
       const { data: profile, error: profileError } = await supabase
@@ -43,6 +49,7 @@ export function ProfileSetup() {
     loadProfile();
   }, [navigate]);
 
+  // Handle form submission (Save Profile)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -70,6 +77,7 @@ export function ProfileSetup() {
 
       if (updateError) throw updateError;
 
+      // Navigate to dashboard after saving
       navigate('/dashboard');
     } catch (error: any) {
       setError(error.message);
@@ -91,6 +99,20 @@ export function ProfileSetup() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Display Email as Read-only */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                disabled
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
             <div>
               <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
                 Full Name *
@@ -102,6 +124,7 @@ export function ProfileSetup() {
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
+                disabled={!isEditing}
               />
             </div>
 
@@ -118,6 +141,7 @@ export function ProfileSetup() {
                 required
                 pattern="[0-9]{10}"
                 title="Please enter a valid 10-digit phone number"
+                disabled={!isEditing}
               />
             </div>
 
@@ -133,6 +157,7 @@ export function ProfileSetup() {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 required
                 max={new Date().toISOString().split('T')[0]}
+                disabled={!isEditing}
               />
             </div>
 
@@ -150,6 +175,7 @@ export function ProfileSetup() {
                   step="0.1"
                   min="0"
                   max="500"
+                  disabled={!isEditing}
                 />
               </div>
 
@@ -166,6 +192,7 @@ export function ProfileSetup() {
                   step="0.1"
                   min="0"
                   max="300"
+                  disabled={!isEditing}
                 />
               </div>
             </div>
@@ -186,6 +213,7 @@ export function ProfileSetup() {
                 pattern="[0-9]{12}"
                 title="Please enter a valid 12-digit Aadhar number"
                 placeholder="Enter 12 digit Aadhar number"
+                disabled={!isEditing}
               />
             </div>
 
@@ -198,6 +226,7 @@ export function ProfileSetup() {
                 value={formData.blood_type || ''}
                 onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                disabled={!isEditing}
               >
                 <option value="">Select blood type</option>
                 <option value="A+">A+</option>
@@ -211,7 +240,16 @@ export function ProfileSetup() {
               </select>
             </div>
 
-            <div className="flex justify-end">
+            {/* Button to toggle edit mode */}
+            <div className="flex justify-between">
+              <button
+                type="button"
+                onClick={() => setIsEditing((prev) => !prev)}
+                className="px-4 py-2 text-blue-600 hover:text-blue-700"
+              >
+                {isEditing ? 'Cancel Editing' : 'Edit Profile'}
+              </button>
+
               <button
                 type="submit"
                 disabled={loading}

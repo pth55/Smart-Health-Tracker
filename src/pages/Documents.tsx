@@ -18,6 +18,8 @@ export function Documents() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(true);
+  const [viewFile, setViewFile] = useState<string | null>(null); // State to track file to be viewed
+
   const categories = ['Prescriptions', 'Lab Reports', 'Bills', 'Other'];
 
   useEffect(() => {
@@ -125,18 +127,14 @@ export function Documents() {
   const handleDelete = async (documentId: string, documentPath: string) => {
     setIsDeleting(documentId);
     try {
-      // First delete from storage
       await deleteFile(documentPath, 'medical-documents');
-
-      // Then delete from database
       const { error } = await supabase
         .from('medical_documents')
         .delete()
         .eq('id', documentId);
 
       if (error) throw error;
-      
-      // Update local state
+
       setDocuments(prev => prev.filter(doc => doc.id !== documentId));
     } catch (err: any) {
       console.error('Error deleting document:', err);
@@ -166,18 +164,12 @@ export function Documents() {
     }
   };
 
-  const handlePreview = async (path: string) => {
-    try {
-      const { data: { signedUrl }, error: signedUrlError } = await supabase.storage
-        .from('medical-documents')
-        .createSignedUrl(path, 60 * 60); // 1 hour expiry
+  const handleView = (filePath: string) => {
+    setViewFile(filePath); // Set the file to be viewed
+  };
 
-      if (signedUrlError) throw signedUrlError;
-      window.open(signedUrl, '_blank');
-    } catch (err: any) {
-      console.error('Error previewing document:', err);
-      setError('Failed to preview document. Please try again.');
-    }
+  const handleCloseModal = () => {
+    setViewFile(null); // Close the modal
   };
 
   return (
@@ -185,8 +177,8 @@ export function Documents() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Medical Documents</h1>
-            <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
+            <h1 className="sm:text-2xl font-bold text-gray-900 text-xl">Medical Documents</h1>
+            <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors sm:px-3 sm:py-1 text-sm md:text-base">
               <Upload className="h-5 w-5 mr-2" />
               Upload Document
               <input
@@ -245,13 +237,23 @@ export function Documents() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center">
                       <FileText className="h-6 w-6 text-blue-600" />
-                      <h3 className="ml-2 font-medium text-gray-900 truncate">{doc.title}</h3>
+                      <h3 className="ml-2 font-medium text-gray-900" title={doc.title}>
+                        {doc.title.length > 30 ? (
+                          <span className="truncate sm:max-w-xs md:max-w-sm lg:max-w-md">{doc.title.slice(0, 20)}...</span>
+                        ) : doc.title.length > 20 ? (
+                          <span className="truncate sm:max-w-xs md:max-w-sm">{doc.title.slice(0, 20)}...</span>
+                        ) : doc.title.length > 10 ? (
+                          <span className="truncate sm:max-w-xs">{doc.title.slice(0, 10)}...</span>
+                        ) : (
+                          doc.title
+                        )}
+                      </h3>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handlePreview(doc.document_path)}
+                        onClick={() => handleView(doc.document_path)} // Open the file in modal
                         className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Preview"
+                        title="View"
                       >
                         <FileText className="h-5 w-5" />
                       </button>
@@ -307,18 +309,15 @@ export function Documents() {
                   type="text"
                   value={uploadDetails.title}
                   onChange={(e) => setUploadDetails(prev => ({ ...prev, title: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
+                  className="w-full border rounded-md py-2 px-3 text-gray-700"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700">Category</label>
                 <select
                   value={uploadDetails.category}
                   onChange={(e) => setUploadDetails(prev => ({ ...prev, category: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
+                  className="w-full border rounded-md py-2 px-3 text-gray-700"
                 >
                   {categories.map((category) => (
                     <option key={category} value={category}>
@@ -327,39 +326,60 @@ export function Documents() {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700">Notes (Optional)</label>
                 <textarea
                   value={uploadDetails.notes}
                   onChange={(e) => setUploadDetails(prev => ({ ...prev, notes: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full border rounded-md py-2 px-3 text-gray-700"
                   rows={3}
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Selected File</label>
-                <p className="mt-1 text-sm text-gray-500">{uploadDetails.file?.name}</p>
-              </div>
-
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {loading ? 'Uploading...' : 'Upload'}
+                  {loading ? <Loader className="h-5 w-5 animate-spin" /> : 'Upload'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View File Modal */}
+      {viewFile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white p-4 max-w-4xl w-full">
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-0 right-0 p-2 text-white bg-red-500 rounded-full"
+            >
+              ×
+            </button>
+            {viewFile.endsWith('.pdf') ? (
+              <iframe
+                src={viewFile}
+                className="w-full h-96"
+                title="Document Viewer"
+                frameBorder="0"
+              />
+            ) : (
+              <img
+                src={viewFile}
+                alt="Document Preview"
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
           </div>
         </div>
       )}

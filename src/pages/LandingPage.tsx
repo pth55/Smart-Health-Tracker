@@ -141,9 +141,18 @@ export function LandingPage() {
       {/* Navbar */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <Heart className="h-8 w-8 text-blue-600" />
-            <span className="ml-2 text-xl font-bold text-gray-900">Cloud Based PHR Management System by Siddhartha Academy of Higher Edu.</span>
+          <div className="flex flex-col items-start">
+            <div className="flex items-center">
+              <Heart className="h-8 w-8 text-blue-600" />
+              {/* Full title for larger screens */}
+              <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:block">Cloud Based PHR Management System</span>
+              {/* Shortened title for mobile screens */}
+              <span className="ml-2 text-xl font-bold text-gray-900 sm:hidden">Cloud Based PHR</span>
+            </div>
+            {/* Full text for larger screens */}
+            <span className="text-sm text-gray-600 mt-1 sm:mt-2 pl-10 hidden sm:block">by <b>Siddhartha Academy of Higher Education</b></span>
+            {/* Shortened text for mobile screens */}
+            <span className="text-sm text-gray-600 mt-1 sm:mt-2 pl-5 sm:hidden">by <b>SAHE</b></span>
           </div>
           <div className="flex items-center space-x-4">
             <button onClick={() => { setIsSignUp(false); setShowAuthModal(true); setError(''); }} className="px-4 py-2 text-blue-600 hover:text-blue-700">Log In</button>
@@ -151,7 +160,7 @@ export function LandingPage() {
           </div>
         </div>
       </nav>
-      
+
       {/* Hero Section with Slider */}
       <section className="relative text-center py-20 px-4">
         <div className="max-w-7xl mx-auto">
@@ -241,7 +250,7 @@ export function LandingPage() {
                 <FileText className="h-8 w-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">2. Upload Records</h3>
-              <p className="text-gray-600">Easily upload and organize your medical documents</p>
+              <p className="text-gray-600">Easily upload and organize your Health documents</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -261,7 +270,7 @@ export function LandingPage() {
             <div>
               <div className="flex items-center mb-4">
                 <Heart className="h-8 w-8 text-blue-400" />
-                <span className="ml-2 text-xl font-bold">HealthTrack</span>
+                <span className="ml-2 text-xl font-bold">Cloud PHR</span>
               </div>
               <p className="text-gray-400">
                 Your comprehensive health management solution for a better, healthier life.
@@ -296,7 +305,8 @@ export function LandingPage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} HealthTrack. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Cloud PHR. All rights reserved.</p>
+            <p>Made with ❤️ by Siddhartha Academy of Higher Education!</p>
           </div>
         </div>
       </footer>
